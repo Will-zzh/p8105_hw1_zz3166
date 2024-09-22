@@ -1,0 +1,133 @@
+---
+title: "p8105_hw1_zz3166"
+output: github_document
+date: "2024-09-21"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Problem 1
+```{r}
+data("penguins", package = "palmerpenguins")
+str(penguins)
+summary(penguins)
+```
+
+Penguins Dataset Overview
+
+The `penguins` dataset contains information about penguin species collected from Palmer Station, Antarctica. Important variables in this dataset include:
+
+- **Species**: Species of penguin (`Adelie`, `Chinstrap`, `Gentoo`)
+- **island**: Island name (`Biscoe`, `Dream`, `Torgersen`)
+- **bill_length_mm**: Length of the penguin's bill in millimeters
+- **bill_depth_mm**: Depth of the penguin's bill in millimeters
+- **flipper_length_mm**: Length of the penguin's flippers in millimeters
+- **body_mass_g**: Body mass in grams
+- **sex**: Sex of the penguin (`male`, `female`)
+- **year**: Time when the data recorded
+
+The dataset contains `r nrow(penguins)` rows and `r ncol(penguins)` columns. The mean flipper length across all penguins is `r round(mean(penguins$flipper_length_mm, na.rm = TRUE), 2)` mm.
+
+
+```{r}
+library(ggplot2)
+
+ggplot(data = penguins, aes(x = bill_length_mm, y = flipper_length_mm, color = species)) +
+  geom_point() +
+  labs(title = "Flipper Length vs. Bill Length by Species",
+       x = "Bill Length (mm)",
+       y = "Flipper Length (mm)",
+       color = "Species") +
+  theme_minimal()
+ggsave("penguin_scatterplot.png")
+```
+
+Problem 2
+
+Creating the Data Frame
+```{r}
+set.seed(123)
+
+random_sample <- rnorm(10)
+
+# Create logical vector: TRUE if numeric_var > 0, else FALSE
+logical_vector <- random_sample > 0
+
+# Create character vector
+character_vector <- c("Apple", "Banana", "Cherry", "Date", "Elderberry",
+                      "Fig", "Grape", "Honeydew", "Ita Palm", "Jackfruit")
+
+# Create factor vector with 3 levels
+factor_levels <- c("Low", "Medium", "High")
+factor_vector <- factor(rep(factor_levels, length.out = 10))
+
+my_data <- data.frame(
+  random_sample,
+  logical_vector,
+  character_vector,
+  factor_vector
+)
+```
+
+
+```{r}
+library(tidyverse)
+
+# Mean of the numeric variable
+mean_random_sample <- mean(pull(my_data, random_sample))
+mean_random_sample
+
+```
+**Success**.The mean of `random_sample` is successfully calculated because it is a numeric factor
+
+```{r}
+# Mean of the logical vector
+mean_logical_vector <- mean(pull(my_data, logical_vector))
+mean_logical_vector
+
+```
+**Success**.The mean of `logical_vector` is successfully calculated. In R, logical values are coerced to numeric values (`TRUE` becomes 1, `FALSE` becomes 0), so the mean represents the proportion of `TRUE` values. 
+
+```{r}
+# Mean of the character vector
+mean_character_vector <- mean(pull(my_data, character_vector))
+
+```
+**Error**. Computing the mean of `character_vector` fails because character strings cannot be averaged. R cannot coerce character data to numeric values in this context.
+
+```{r}
+# Mean of the factor vector
+mean_factor_vector <- mean(pull(my_data, factor_vector))
+
+```
+**Error**. Computing the mean of `factor_vector` fails. Although factors are internally stored as integers, the `mean()` function does not directly compute the mean of factor levels because factors are considered categorical data.
+
+
+Applying `as.numeric()` to Variables
+```{r}
+# Apply as.numeric to the logical vector
+numeric_logical_vector <- as.numeric(my_data$logical_vector)
+
+# Apply as.numeric to the character vector
+numeric_character_vector <- as.numeric(my_data$character_vector)
+
+# Apply as.numeric to the factor vector
+numeric_factor_vector <- as.numeric(my_data$factor_vector)
+
+```
+**Logical Vector**: 
+`TRUE` values are converted to `1`, and `FALSE` values are converted to `0`. Logical values in R are stored as integers under the hood, where `True` equals `1` and `FALSE` equals `0`. 
+After conversion, computing the mean yields the proportion of `TRUE` values in the vector. This explains why taking the mean of a logical vector works; the logical values are effectively numeric.
+
+**Character Vector**: 
+If the character vector contains numbers in string form (e.g., `"1"`, `"2"`), `as.numeric()` converts them to numeric values.If it contains non-numeric strings, `as.numeric()` will produce `NA` and a warning.Character vectors cannot be averaged because they are non-numeric, and coercion may not result in valid numbers.
+
+**Factor Vector**:
+Factors are internally stored as integers corresponding to their levels. `as.numeric()` on a factor returns these underlying integer codes. This may not represent meaningful numeric data. The mean of the factor vector does not work directly because factors are categorical.Converting factors to numeric gives the underlying integer codes, which may not be meaningful.
+
+**Conclusion**:
+Understanding how R handles different data types and coercion helps explain why certain operations succeed or fail. This emphasizes the importance of ensuring variables are in the correct format for analysis. 
+
